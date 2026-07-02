@@ -13,7 +13,24 @@ const reportTemplates = [
   { id: 4, title: "Tax Deductible Expenses", description: "Filtered list of expenses categorized under tax-deductible categories.", type: "PDF" },
 ]
 
+import { exportToCSV } from "@/lib/utils"
+
+// Dummy data for reports
+const dummyReportData = [
+  { Date: "2026-07-01", Client: "Acme Corp", Category: "Meta Ads", Amount: 125000, Partner: "Admin User", Status: "Reimbursed" },
+  { Date: "2026-07-02", Client: "Global Tech", Category: "Software", Amount: 45000, Partner: "Ananthu V.K", Status: "Pending" }
+]
+
 export default function ReportsPage() {
+  const handleGenerate = (report: any) => {
+    if (report.type === "CSV" || report.type === "Excel") {
+      exportToCSV(dummyReportData, `Report_${report.title.replace(/\s+/g, "_")}`)
+    } else {
+      // PDF simulation
+      exportToCSV(dummyReportData, `PDF_Data_Export_${report.title.replace(/\s+/g, "_")}`)
+    }
+  }
+
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
       <div className="flex items-center justify-between space-y-2">
@@ -22,7 +39,7 @@ export default function ReportsPage() {
           <p className="text-muted-foreground">Generate and download standard financial reports.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => exportToCSV(dummyReportData, "custom_report")}>
             <Filter className="mr-2 h-4 w-4" />
             Custom Report
           </Button>
@@ -83,7 +100,7 @@ export default function ReportsPage() {
               </div>
             </CardHeader>
             <CardFooter className="mt-auto pt-4 border-t">
-              <Button variant="ghost" className="w-full justify-between group">
+              <Button variant="ghost" className="w-full justify-between group" onClick={() => handleGenerate(report)}>
                 Generate Report
                 <Download className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
               </Button>
