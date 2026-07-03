@@ -65,12 +65,13 @@ export default function AddClientPage() {
               <Input id="contact" className="h-12" placeholder="Email or Phone" {...register("contact")} />
               {errors.contact && <p className="text-[0.8rem] font-medium text-destructive">{errors.contact.message}</p>}
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button type="button" variant="outline" className="flex-1 h-12" onClick={() => router.back()} disabled={isSubmitting}>
+            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-border/50">
+              <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1 h-12" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save Client
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Client
               </Button>
             </div>
           </form>
