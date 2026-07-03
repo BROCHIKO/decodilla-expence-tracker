@@ -204,11 +204,11 @@ export default function AddExpensePage() {
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button type="button" variant="outline" className="w-full h-12" onClick={() => router.back()} disabled={isSubmitting}>
+            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-border/50">
+              <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" className="w-full h-12" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Expense
               </Button>

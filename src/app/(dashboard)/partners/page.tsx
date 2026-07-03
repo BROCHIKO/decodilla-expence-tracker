@@ -22,11 +22,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
 
 export default function PartnersPage() {
+  const router = useRouter()
   const partnersStore = useStore((state) => state.partners)
   const expenses = useStore((state) => state.expenses)
+  const settleReimbursements = useStore((state) => state.settleReimbursements)
+  const updatePartnerStatus = useStore((state) => state.updatePartnerStatus)
 
   // Calculate dynamic stats for each partner from the expenses array
   const partners = partnersStore.map(partner => {
@@ -36,11 +40,15 @@ export default function PartnersPage() {
     )
     const totalSpent = partnerExpenses.reduce((sum, exp) => sum + exp.amount, 0)
     
+    // Only pending if not reimbursed
+    const pendingExpenses = partnerExpenses.filter(exp => !exp.isReimbursed)
+    const pendingReimbursement = pendingExpenses.reduce((sum, exp) => sum + exp.amount, 0)
+    
     return {
       ...partner,
-      status: "Active",
+      status: partner.status || "Active", // fallback to active if undefined
       totalSpent,
-      pendingReimbursement: totalSpent // Assuming all are pending for now
+      pendingReimbursement 
     }
   })
 
@@ -120,8 +128,8 @@ export default function PartnersPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="text-success bg-success/10">
-                    Active
+                  <Badge variant="secondary" className={partner.status === 'Active' ? "text-success bg-success/10" : "text-muted-foreground bg-muted"}>
+                    {partner.status}
                   </Badge>
                 </TableCell>
                 <TableCell>₹{partner.totalSpent.toLocaleString()}</TableCell>
@@ -133,9 +141,21 @@ export default function PartnersPage() {
                       <MoreHorizontal className="h-4 w-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Settle Reimbursement</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push(`/partners/${partner.id}`)}>
+                        View Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => settleReimbursements(partner.name)}>
+                        Settle Reimbursement
+                      </DropdownMenuItem>
+                      {partner.status === 'Active' ? (
+                        <DropdownMenuItem className="text-destructive" onClick={() => updatePartnerStatus(partner.id, 'Inactive')}>
+                          Deactivate
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem className="text-success" onClick={() => updatePartnerStatus(partner.id, 'Active')}>
+                          Activate
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
