@@ -12,7 +12,28 @@ import {
 import { ExpenseTrend } from "@/components/dashboard/expense-trend"
 import { RecentExpenses } from "@/components/dashboard/recent-expenses"
 
+import Link from "next/link"
+import { useStore } from "@/lib/store"
+
 export default function Dashboard() {
+  const expenses = useStore((state) => state.expenses)
+  const clients = useStore((state) => state.clients)
+  const partners = useStore((state) => state.partners)
+
+  // Calculations
+  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)
+  
+  const currentMonth = new Date().toISOString().slice(0, 7) // "YYYY-MM"
+  const thisMonthExpenses = expenses
+    .filter((exp) => exp.date.startsWith(currentMonth))
+    .reduce((sum, exp) => sum + exp.amount, 0)
+    
+  // Unique months logic for Avg Monthly Expense
+  const uniqueMonths = new Set(expenses.map(exp => exp.date.slice(0, 7)))
+  const totalMonths = uniqueMonths.size
+  // Math Safety: Prevent divide by zero or NaN
+  const avgMonthlyExpense = totalMonths > 0 ? totalExpenses / totalMonths : 0
+
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
@@ -25,8 +46,14 @@ export default function Dashboard() {
             <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹0</div>
-            <p className="text-xs text-muted-foreground">No data from last month</p>
+            <div className="text-2xl font-bold">₹{totalExpenses.toLocaleString()}</div>
+            {expenses.length === 0 ? (
+              <Link href="/expenses/new" className="text-xs text-primary hover:underline mt-1 inline-block font-medium">
+                Add your first expense
+              </Link>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1">Across all time</p>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -35,8 +62,8 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹0</div>
-            <p className="text-xs text-muted-foreground">No data from last month</p>
+            <div className="text-2xl font-bold">₹{thisMonthExpenses.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">Current month</p>
           </CardContent>
         </Card>
         <Card>
@@ -46,7 +73,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹0</div>
-            <p className="text-xs text-muted-foreground">All settled</p>
+            <p className="text-xs text-muted-foreground mt-1">All settled</p>
           </CardContent>
         </Card>
         <Card>
@@ -55,8 +82,14 @@ export default function Dashboard() {
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Add your first client</p>
+            <div className="text-2xl font-bold">{clients.length}</div>
+            {clients.length === 0 ? (
+              <Link href="/clients/new" className="text-xs text-primary hover:underline mt-1 inline-block font-medium">
+                Add your first client
+              </Link>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1">Total active clients</p>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -65,8 +98,14 @@ export default function Dashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Setup partner profiles</p>
+            <div className="text-2xl font-bold">{partners.length}</div>
+            {partners.length === 0 ? (
+              <Link href="/partners/new" className="text-xs text-primary hover:underline mt-1 inline-block font-medium">
+                Setup partner profiles
+              </Link>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1">Registered partners</p>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -75,8 +114,8 @@ export default function Dashboard() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹0</div>
-            <p className="text-xs text-muted-foreground">Year to date</p>
+            <div className="text-2xl font-bold">₹{Math.round(avgMonthlyExpense).toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">Year to date</p>
           </CardContent>
         </Card>
       </div>

@@ -28,6 +28,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { useStore } from "@/lib/store"
 
 const expenseFormSchema = z.object({
   date: z.date({
@@ -52,6 +53,7 @@ type ExpenseFormValues = z.infer<typeof expenseFormSchema>
 export default function AddExpensePage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const addExpense = useStore((state) => state.addExpense)
 
   const {
     register,
@@ -70,8 +72,17 @@ export default function AddExpensePage() {
 
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    
+    addExpense({
+      date: format(data.date, "yyyy-MM-dd"),
+      amount: data.amount,
+      name: data.name,
+      payment: data.payment,
+      note: data.note,
+    })
+
+    // Simulate small delay for UX
+    await new Promise((resolve) => setTimeout(resolve, 300))
     setIsSubmitting(false)
     toast.success("Expense added successfully!")
     router.push("/expenses")

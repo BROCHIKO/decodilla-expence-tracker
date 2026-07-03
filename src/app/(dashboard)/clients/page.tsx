@@ -21,9 +21,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-const clients: any[] = []
+import Link from "next/link"
+import { useStore } from "@/lib/store"
 
 export default function ClientsPage() {
+  const clients = useStore((state) => state.clients)
+
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
       <div className="flex items-center justify-between space-y-2">
@@ -32,10 +35,10 @@ export default function ClientsPage() {
           <p className="text-muted-foreground">Manage client details and view overall billing.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button>
+          <Link href="/clients/new" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
             <Plus className="mr-2 h-4 w-4" />
             Add Client
-          </Button>
+          </Link>
         </div>
       </div>
 
@@ -46,7 +49,7 @@ export default function ClientsPage() {
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{clients.length}</div>
             <p className="text-xs text-muted-foreground">Generating revenue</p>
           </CardContent>
         </Card>
@@ -78,22 +81,21 @@ export default function ClientsPage() {
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="" alt={client.name} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">{client.initials}</AvatarFallback>
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">{client.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{client.name}</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="text-sm">{client.contact}</div>
-                  <div className="text-xs text-muted-foreground">{client.email}</div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={client.status === "Active" ? "secondary" : "outline"} className={client.status === "Active" ? "text-success bg-success/10" : "text-muted-foreground"}>
-                    {client.status}
+                  <Badge variant="secondary" className="text-success bg-success/10">
+                    Active
                   </Badge>
                 </TableCell>
-                <TableCell>{client.projects}</TableCell>
-                <TableCell className="text-right font-medium">{client.totalBilled}</TableCell>
+                <TableCell>0</TableCell>
+                <TableCell className="text-right font-medium">₹0</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors hover:bg-accent">

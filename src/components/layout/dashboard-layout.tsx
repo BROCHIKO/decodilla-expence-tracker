@@ -6,7 +6,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen bg-background pb-16 md:pb-0">
       {/* Sidebar for desktop */}
-      <div className="hidden lg:flex lg:flex-col lg:inset-y-0 lg:z-50 lg:w-64">
+      <div className="hidden md:flex md:flex-col md:inset-y-0 md:z-50 md:w-64">
         <Sidebar />
       </div>
 

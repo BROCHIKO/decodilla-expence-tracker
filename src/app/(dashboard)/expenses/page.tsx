@@ -15,17 +15,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// Empty data for fresh start
-const expenses: any[] = []
+import { useStore } from "@/lib/store"
 
 export default function ExpensesPage() {
   const [searchTerm, setSearchTerm] = useState("")
+  const expenses = useStore((state) => state.expenses)
 
   const filteredExpenses = expenses.filter(
     (exp) =>
-      exp.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exp.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exp.id.toLowerCase().includes(searchTerm.toLowerCase())
+      exp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exp.payment.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -72,31 +71,17 @@ export default function ExpensesPage() {
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <div className="text-2xl font-bold tracking-tight">{expense.amount}</div>
-                  <div className="text-sm text-muted-foreground mt-1 font-medium">{expense.client}</div>
+                  <div className="text-2xl font-bold tracking-tight">₹{expense.amount}</div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium line-clamp-1">{expense.name}</div>
                 </div>
-                <Badge
-                  variant={expense.status === "Pending" ? "outline" : "secondary"}
-                  className={
-                    expense.status === "Pending"
-                      ? "text-warning border-warning/50 bg-warning/5"
-                      : "text-success bg-success/10 border-transparent"
-                  }
-                >
-                  {expense.status}
-                </Badge>
               </div>
               
               <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm mt-2 pt-4 border-t border-border/50">
                 <div>
-                  <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-1">Category</p>
-                  <p className="font-medium">{expense.category}</p>
+                  <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-1">Payment</p>
+                  <p className="font-medium line-clamp-1">{expense.payment}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-1">Paid By</p>
-                  <p className="font-medium">{expense.partner}</p>
-                </div>
-                <div className="col-span-2">
                   <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-1">Date</p>
                   <p className="font-medium">{expense.date}</p>
                 </div>
