@@ -29,15 +29,39 @@ export default function ExpensesPage() {
       exp.payment.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const doc = new jsPDF()
     
+    try {
+      const img = new Image()
+      img.src = '/logo.png'
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+      
+      const canvas = document.createElement('canvas')
+      // Scale down image to reduce PDF bloat
+      const scale = Math.min(200 / img.width, 1)
+      canvas.width = img.width * scale
+      canvas.height = img.height * scale
+      const ctx = canvas.getContext('2d')
+      ctx?.drawImage(img, 0, 0, canvas.width, canvas.height)
+      const dataUrl = canvas.toDataURL('image/png')
+      
+      // Calculate aspect ratio for placing in PDF
+      const aspectRatio = img.width / img.height
+      doc.addImage(dataUrl, 'PNG', 14, 10, 30 * aspectRatio, 30)
+    } catch (e) {
+      console.error("Failed to load logo", e)
+    }
+    
     doc.setFontSize(18)
-    doc.text("Total Expenses Report", 14, 20)
+    doc.text("Total Expenses Report", 14, 50)
     
     doc.setFontSize(11)
     doc.setTextColor(100)
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30)
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 60)
     
     const tableData = expenses.map(exp => [
       exp.date,
@@ -47,7 +71,7 @@ export default function ExpensesPage() {
     ])
     
     autoTable(doc, {
-      startY: 35,
+      startY: 65,
       head: [['Date', 'Description', 'Payment Method', 'Amount']],
       body: tableData,
       theme: 'grid',
@@ -57,7 +81,7 @@ export default function ExpensesPage() {
     const totalSum = expenses.reduce((sum, exp) => sum + exp.amount, 0)
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const finalY = (doc as any).lastAutoTable?.finalY || 35
+    const finalY = (doc as any).lastAutoTable?.finalY || 65
     
     doc.setFontSize(12)
     doc.setTextColor(0)
