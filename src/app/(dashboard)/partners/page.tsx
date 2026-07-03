@@ -25,7 +25,28 @@ import Link from "next/link"
 import { useStore } from "@/lib/store"
 
 export default function PartnersPage() {
-  const partners = useStore((state) => state.partners)
+  const partnersStore = useStore((state) => state.partners)
+  const expenses = useStore((state) => state.expenses)
+
+  // Calculate dynamic stats for each partner from the expenses array
+  const partners = partnersStore.map(partner => {
+    // Look for expenses where the payment method references the partner's name
+    const partnerExpenses = expenses.filter(exp => 
+      exp.payment.toLowerCase().includes(partner.name.toLowerCase())
+    )
+    const totalSpent = partnerExpenses.reduce((sum, exp) => sum + exp.amount, 0)
+    
+    return {
+      ...partner,
+      status: "Active",
+      totalSpent,
+      pendingReimbursement: totalSpent // Assuming all are pending for now
+    }
+  })
+
+  // Summary Card Calculations
+  const activePartnersCount = partners.filter(p => p.status === 'Active').length
+  const totalPending = partners.reduce((sum, p) => sum + p.pendingReimbursement, 0)
 
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
@@ -49,7 +70,7 @@ export default function PartnersPage() {
             <ArrowUpRight className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹60,231</div>
+            <div className="text-2xl font-bold">₹{totalPending.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Across all active partners</p>
           </CardContent>
         </Card>
@@ -59,7 +80,7 @@ export default function PartnersPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{activePartnersCount}</div>
             <p className="text-xs text-muted-foreground">Currently active in system</p>
           </CardContent>
         </Card>
@@ -103,8 +124,8 @@ export default function PartnersPage() {
                     Active
                   </Badge>
                 </TableCell>
-                <TableCell>₹0</TableCell>
-                <TableCell className="text-right font-medium text-warning">₹0</TableCell>
+                <TableCell>₹{partner.totalSpent.toLocaleString()}</TableCell>
+                <TableCell className="text-right font-medium text-warning">₹{partner.pendingReimbursement.toLocaleString()}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors hover:bg-accent">
