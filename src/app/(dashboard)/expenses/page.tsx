@@ -43,7 +43,7 @@ export default function ExpensesPage() {
       exp.date,
       exp.name,
       exp.payment,
-      `₹${exp.amount.toLocaleString()}`
+      `Rs. ${exp.amount.toLocaleString('en-IN')}`
     ])
     
     autoTable(doc, {
@@ -62,7 +62,7 @@ export default function ExpensesPage() {
     doc.setFontSize(12)
     doc.setTextColor(0)
     doc.setFont("helvetica", "bold")
-    doc.text(`Total Expenses: ₹${totalSum.toLocaleString()}`, 14, finalY + 10)
+    doc.text(`Total Expenses: Rs. ${totalSum.toLocaleString('en-IN')}`, 14, finalY + 10)
     
     doc.save("expenses_report.pdf")
   }
