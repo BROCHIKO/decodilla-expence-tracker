@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Plus, Search, FileDown, MoreHorizontal, FileEdit, Trash } from "lucide-react"
+import { Plus, Search, FileDown, MoreHorizontal, FileEdit, Trash, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { exportToCSV } from "@/lib/utils"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 import {
   DropdownMenu,
@@ -27,6 +29,44 @@ export default function ExpensesPage() {
       exp.payment.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    
+    doc.setFontSize(18)
+    doc.text("Total Expenses Report", 14, 20)
+    
+    doc.setFontSize(11)
+    doc.setTextColor(100)
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30)
+    
+    const tableData = expenses.map(exp => [
+      exp.date,
+      exp.name,
+      exp.payment,
+      `₹${exp.amount.toLocaleString()}`
+    ])
+    
+    autoTable(doc, {
+      startY: 35,
+      head: [['Date', 'Description', 'Payment Method', 'Amount']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [41, 128, 185] },
+    })
+    
+    const totalSum = expenses.reduce((sum, exp) => sum + exp.amount, 0)
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalY = (doc as any).lastAutoTable?.finalY || 35
+    
+    doc.setFontSize(12)
+    doc.setTextColor(0)
+    doc.setFont("helvetica", "bold")
+    doc.text(`Total Expenses: ₹${totalSum.toLocaleString()}`, 14, finalY + 10)
+    
+    doc.save("expenses_report.pdf")
+  }
+
   return (
     <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between space-y-2">
@@ -38,6 +78,10 @@ export default function ExpensesPage() {
           <Button variant="outline" onClick={() => exportToCSV(expenses, "decodilla-expenses")}>
             <FileDown className="mr-2 h-4 w-4" />
             Export CSV
+          </Button>
+          <Button variant="secondary" onClick={exportToPDF}>
+            <FileText className="mr-2 h-4 w-4" />
+            Export PDF
           </Button>
           <Link href="/expenses/new" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
             <Plus className="mr-2 h-4 w-4" />
