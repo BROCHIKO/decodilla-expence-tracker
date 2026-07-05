@@ -25,37 +25,31 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-const initialCategories = [
-  { id: "CAT-1", name: "Meta Ads", type: "Marketing", count: 0, status: "Active" },
-  { id: "CAT-2", name: "Google Ads", type: "Marketing", count: 0, status: "Active" },
-  { id: "CAT-3", name: "Software Subscriptions", type: "Operations", count: 0, status: "Active" },
-  { id: "CAT-4", name: "Office Supplies", type: "Operations", count: 0, status: "Active" },
-  { id: "CAT-5", name: "Salary", type: "Payroll", count: 0, status: "Active" },
-  { id: "CAT-6", name: "Travel", type: "Miscellaneous", count: 0, status: "Active" },
-]
+import { useStore } from "@/lib/store"
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState(initialCategories)
+  const categories = useStore((state) => state.categories)
+  const addCategory = useStore((state) => state.addCategory)
+  const deleteCategory = useStore((state) => state.deleteCategory)
+
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [newCatName, setNewCatName] = useState("")
   const [newCatType, setNewCatType] = useState("Operations")
 
   const handleDelete = (id: string) => {
-    setCategories(categories.filter((cat) => cat.id !== id))
+    deleteCategory(id)
   }
 
   const handleAddCategory = () => {
     if (!newCatName.trim()) return
 
-    const newCategory = {
-      id: `CAT-${Math.floor(Math.random() * 10000)}`,
+    addCategory({
       name: newCatName,
       type: newCatType,
       count: 0,
       status: "Active"
-    }
+    })
 
-    setCategories([...categories, newCategory])
     setNewCatName("")
     setIsAddOpen(false)
   }

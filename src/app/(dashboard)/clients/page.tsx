@@ -69,8 +69,6 @@ export default function ClientsPage() {
               <TableHead>Client Name</TableHead>
               <TableHead>Contact Person</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Projects</TableHead>
-              <TableHead className="text-right">Total Billed</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -94,8 +92,6 @@ export default function ClientsPage() {
                     Active
                   </Badge>
                 </TableCell>
-                <TableCell>0</TableCell>
-                <TableCell className="text-right font-medium">₹0</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors hover:bg-accent">

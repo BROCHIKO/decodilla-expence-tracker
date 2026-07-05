@@ -1,28 +1,56 @@
 "use client"
 
+import { useStore } from "@/lib/store"
+import { useMemo } from "react"
+import { format, parseISO } from "date-fns"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts"
 
-const monthlyData = [
-  { name: "Jan", expenses: 42000 },
-  { name: "Feb", expenses: 38000 },
-  { name: "Mar", expenses: 51000 },
-  { name: "Apr", expenses: 45000 },
-  { name: "May", expenses: 62000 },
-  { name: "Jun", expenses: 58000 },
-]
-
-const categoryData = [
-  { name: "Software", value: 35000 },
-  { name: "Travel", value: 45000 },
-  { name: "Food", value: 15000 },
-  { name: "Equipment", value: 25000 },
-  { name: "Other", value: 10000 },
-]
-
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"]
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899", "#64748b"]
 
 export default function AnalyticsPage() {
+  const expenses = useStore((state) => state.expenses)
+  const categories = useStore((state) => state.categories)
+
+  const monthlyData = useMemo(() => {
+    const months = new Map<string, number>()
+    expenses.forEach(exp => {
+      if (!exp.date) return
+      const monthStr = exp.date.substring(0, 7)
+      const current = months.get(monthStr) || 0
+      months.set(monthStr, current + exp.amount)
+    })
+    
+    const sortedMonths = Array.from(months.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+    
+    return sortedMonths.map(([monthStr, amount]) => {
+      const date = parseISO(`${monthStr}-01`)
+      return {
+        name: format(date, "MMM"),
+        expenses: amount
+      }
+    })
+  }, [expenses])
+
+  const categoryData = useMemo(() => {
+    const catAmounts = new Map<string, number>()
+    
+    expenses.forEach(exp => {
+      const catName = exp.categoryId 
+        ? (categories.find(c => c.id === exp.categoryId)?.name || "Other")
+        : "Uncategorized"
+        
+      const current = catAmounts.get(catName) || 0
+      catAmounts.set(catName, current + exp.amount)
+    })
+    
+    return Array.from(catAmounts.entries())
+      .filter(([_, value]) => value > 0)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+  }, [expenses, categories])
+
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
       <div className="flex items-center justify-between space-y-2">

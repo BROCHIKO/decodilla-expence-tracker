@@ -45,6 +45,7 @@ const expenseFormSchema = z.object({
   payment: z.string({
     message: "Please select payment method.",
   }),
+  category: z.string().optional(),
   note: z.string().optional(),
 })
 
@@ -55,6 +56,7 @@ export default function AddExpensePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const addExpense = useStore((state) => state.addExpense)
   const partners = useStore((state) => state.partners).filter(p => p.status === 'Active')
+  const categories = useStore((state) => state.categories).filter(c => c.status === 'Active')
 
   const {
     register,
@@ -68,6 +70,7 @@ export default function AddExpensePage() {
       name: "",
       note: "",
       payment: "company_card",
+      category: "",
     },
   })
 
@@ -91,6 +94,7 @@ export default function AddExpensePage() {
       name: data.name,
       payment: paymentName,
       partnerId,
+      categoryId: data.category || undefined,
       note: data.note,
     })
 
@@ -204,6 +208,28 @@ export default function AddExpensePage() {
               {errors.payment && (
                 <p className="text-[0.8rem] font-medium text-destructive">{errors.payment.message}</p>
               )}
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="category">Category (Optional)</Label>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <SelectTrigger id="category" className="h-12">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div className="flex flex-col space-y-2">

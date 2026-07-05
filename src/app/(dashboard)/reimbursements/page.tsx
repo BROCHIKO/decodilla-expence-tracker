@@ -6,37 +6,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-const reimbursements = [
-  { 
-    id: "R-101", 
-    partner: "Abhijith KR", 
-    initials: "AK",
-    totalSpent: "₹0", 
-    owed: "₹0", 
-    status: "Settled",
-    expensesCount: 0 
-  },
-  { 
-    id: "R-102", 
-    partner: "Ananthu V.K", 
-    initials: "AV",
-    totalSpent: "₹0", 
-    owed: "₹0", 
-    status: "Settled",
-    expensesCount: 0 
-  },
-  { 
-    id: "R-103", 
-    partner: "Riyan Ahmed", 
-    initials: "RA",
-    totalSpent: "₹0", 
-    owed: "₹0", 
-    status: "Settled",
-    expensesCount: 0 
-  }
-]
+import { useStore } from "@/lib/store"
 
 export default function ReimbursementsPage() {
+  const partners = useStore((state) => state.partners).filter(p => p.status === 'Active')
+  const expenses = useStore((state) => state.expenses)
+  const settleReimbursements = useStore((state) => state.settleReimbursements)
+
+  const reimbursements = partners.map(partner => {
+    const partnerExpenses = expenses.filter(exp => exp.partnerId === partner.id)
+    const pendingExpenses = partnerExpenses.filter(exp => !exp.isReimbursed)
+    
+    const totalSpent = partnerExpenses.reduce((sum, exp) => sum + exp.amount, 0)
+    const owed = pendingExpenses.reduce((sum, exp) => sum + exp.amount, 0)
+    
+    return {
+      id: partner.id,
+      partner: partner.name,
+      initials: partner.name.substring(0, 2).toUpperCase(),
+      totalSpent: `₹${totalSpent.toLocaleString()}`,
+      owed: `₹${owed.toLocaleString()}`,
+      status: owed > 0 ? "Pending" : "Settled",
+      expensesCount: partnerExpenses.length
+    }
+  })
+
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
       <div className="flex items-center justify-between space-y-2">
@@ -90,7 +84,10 @@ export default function ReimbursementsPage() {
                     All Settled
                   </Button>
                 ) : (
-                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Button 
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => settleReimbursements(item.id)}
+                  >
                     <Receipt className="mr-2 h-4 w-4" />
                     Mark as Settled
                   </Button>
