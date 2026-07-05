@@ -33,7 +33,19 @@ export function TopNav() {
   const filteredClients = clients.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
   const filteredPartners = partners.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
-  const hasResults = filteredExpenses.length > 0 || filteredClients.length > 0 || filteredPartners.length > 0
+  const pages = [
+    { name: "Dashboard", path: "/" },
+    { name: "Expenses", path: "/expenses" },
+    { name: "Clients", path: "/clients" },
+    { name: "Partners", path: "/partners" },
+    { name: "Reports", path: "/reports" },
+    { name: "Settings", path: "/settings" },
+    { name: "Profile", path: "/profile" },
+  ]
+  
+  const filteredPages = pages.filter(page => page.name.toLowerCase().includes(searchQuery.toLowerCase()))
+
+  const hasResults = filteredPages.length > 0 || filteredExpenses.length > 0 || filteredClients.length > 0 || filteredPartners.length > 0
   const handleLogout = () => {
     // Clear local storage for the Zustand store and any other user data
     localStorage.removeItem("decodilla-finance-storage")
@@ -67,6 +79,16 @@ export function TopNav() {
               <div className="p-2 space-y-4">
                 {hasResults ? (
                   <>
+                    {filteredPages.length > 0 && (
+                      <div>
+                        <h3 className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</h3>
+                        {filteredPages.map(page => (
+                          <Link key={page.path} href={page.path} onClick={() => setSearchQuery("")} className="block px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
+                            {page.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                     {filteredClients.length > 0 && (
                       <div>
                         <h3 className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Clients</h3>
