@@ -16,8 +16,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
+import { useRouter } from "next/navigation"
+
 export function TopNav() {
   const { setTheme, theme } = useTheme()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    // Clear local storage for the Zustand store and any other user data
+    localStorage.removeItem("decodilla-finance-storage")
+    // Redirect to home or login page and force refresh to clear state
+    window.location.href = "/"
+  }
 
   return (
     <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b bg-background px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
@@ -74,11 +84,11 @@ export function TopNav() {
               <DropdownMenuGroup>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/profile")}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/settings")}>Settings</DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
