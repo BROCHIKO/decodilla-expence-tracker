@@ -1,12 +1,26 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts"
 
-const monthlyData: any[] = []
-const categoryData: any[] = []
+const monthlyData = [
+  { name: "Jan", expenses: 42000 },
+  { name: "Feb", expenses: 38000 },
+  { name: "Mar", expenses: 51000 },
+  { name: "Apr", expenses: 45000 },
+  { name: "May", expenses: 62000 },
+  { name: "Jun", expenses: 58000 },
+]
 
-const COLORS = ["#000000", "#3b82f6", "#10b981", "#f59e0b", "#64748b"]
+const categoryData = [
+  { name: "Software", value: 35000 },
+  { name: "Travel", value: 45000 },
+  { name: "Food", value: 15000 },
+  { name: "Equipment", value: 25000 },
+  { name: "Other", value: 10000 },
+]
+
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"]
 
 export default function AnalyticsPage() {
   return (
@@ -81,6 +95,7 @@ export default function AnalyticsPage() {
                 <Tooltip 
                   formatter={(value: any) => [`₹${Number(value || 0).toLocaleString()}`, "Amount"]}
                 />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
