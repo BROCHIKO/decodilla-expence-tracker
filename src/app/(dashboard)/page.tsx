@@ -34,6 +34,10 @@ export default function Dashboard() {
   // Math Safety: Prevent divide by zero or NaN
   const avgMonthlyExpense = totalMonths > 0 ? totalExpenses / totalMonths : 0
 
+  const pendingReimbursements = expenses
+    .filter(exp => exp.partnerId && !exp.isReimbursed)
+    .reduce((sum, exp) => sum + exp.amount, 0)
+
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
@@ -72,8 +76,12 @@ export default function Dashboard() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹0</div>
-            <p className="text-xs text-muted-foreground mt-1">All settled</p>
+            <div className="text-2xl font-bold">₹{pendingReimbursements.toLocaleString()}</div>
+            {pendingReimbursements === 0 ? (
+              <p className="text-xs text-muted-foreground mt-1">All settled</p>
+            ) : (
+              <p className="text-xs text-warning mt-1">Needs attention</p>
+            )}
           </CardContent>
         </Card>
         <Card>

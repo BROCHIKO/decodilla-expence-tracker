@@ -54,6 +54,7 @@ export default function AddExpensePage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const addExpense = useStore((state) => state.addExpense)
+  const partners = useStore((state) => state.partners).filter(p => p.status === 'Active')
 
   const {
     register,
@@ -66,18 +67,30 @@ export default function AddExpensePage() {
       date: new Date(),
       name: "",
       note: "",
-      payment: "Company Card",
+      payment: "company_card",
     },
   })
 
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true)
     
+    let paymentName = "Company Card"
+    let partnerId: string | undefined = undefined
+    
+    if (data.payment !== "company_card") {
+      const partner = partners.find(p => p.id === data.payment)
+      if (partner) {
+        paymentName = `Paid by ${partner.name}`
+        partnerId = partner.id
+      }
+    }
+    
     addExpense({
       date: format(data.date, "yyyy-MM-dd"),
       amount: data.amount,
       name: data.name,
-      payment: data.payment,
+      payment: paymentName,
+      partnerId,
       note: data.note,
     })
 
@@ -178,10 +191,12 @@ export default function AddExpensePage() {
                       <SelectValue placeholder="Select payment method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Company Card">Company Card</SelectItem>
-                      <SelectItem value="Abhijith KR">Paid by Abhijith KR</SelectItem>
-                      <SelectItem value="Ananthu V.K">Paid by Ananthu V.K</SelectItem>
-                      <SelectItem value="Riyan Ahmed">Paid by Riyan Ahmed</SelectItem>
+                      <SelectItem value="company_card">Company Card</SelectItem>
+                      {partners.map(partner => (
+                        <SelectItem key={partner.id} value={partner.id}>
+                          Paid by {partner.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}

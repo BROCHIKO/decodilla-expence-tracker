@@ -34,10 +34,8 @@ export default function PartnersPage() {
 
   // Calculate dynamic stats for each partner from the expenses array
   const partners = partnersStore.map(partner => {
-    // Look for expenses where the payment method references the partner's name
-    const partnerExpenses = expenses.filter(exp => 
-      exp.payment.toLowerCase().includes(partner.name.toLowerCase())
-    )
+    // Look for expenses matching the partner's unique ID
+    const partnerExpenses = expenses.filter(exp => exp.partnerId === partner.id)
     const totalSpent = partnerExpenses.reduce((sum, exp) => sum + exp.amount, 0)
     
     // Only pending if not reimbursed
@@ -144,7 +142,7 @@ export default function PartnersPage() {
                       <DropdownMenuItem onClick={() => router.push(`/partners/${partner.id}`)}>
                         View Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => settleReimbursements(partner.name)}>
+                      <DropdownMenuItem onClick={() => settleReimbursements(partner.id)}>
                         Settle Reimbursement
                       </DropdownMenuItem>
                       {partner.status === 'Active' ? (

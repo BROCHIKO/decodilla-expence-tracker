@@ -7,6 +7,7 @@ export interface Expense {
   amount: number
   name: string
   payment: string
+  partnerId?: string
   note?: string
   isReimbursed?: boolean
 }
@@ -33,7 +34,7 @@ interface AppState {
   addClient: (client: Omit<Client, 'id'>) => void
   addPartner: (partner: Omit<Partner, 'id'>) => void
   updatePartnerStatus: (id: string, status: 'Active' | 'Inactive') => void
-  settleReimbursements: (partnerName: string) => void
+  settleReimbursements: (partnerId: string) => void
 }
 
 export const useStore = create<AppState>()(
@@ -59,9 +60,9 @@ export const useStore = create<AppState>()(
         partners: state.partners.map(p => p.id === id ? { ...p, status } : p)
       })),
 
-      settleReimbursements: (partnerName) => set((state) => ({
+      settleReimbursements: (partnerId) => set((state) => ({
         expenses: state.expenses.map(exp => 
-          exp.payment.toLowerCase().includes(partnerName.toLowerCase())
+          exp.partnerId === partnerId
             ? { ...exp, isReimbursed: true }
             : exp
         )
