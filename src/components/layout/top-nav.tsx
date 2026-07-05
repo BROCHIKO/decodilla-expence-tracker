@@ -1,7 +1,5 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-import Link from "next/link"
 import { Bell, Search } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
@@ -19,21 +17,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { useRouter } from "next/navigation"
-import { useStore } from "@/lib/store"
+
 export function TopNav() {
   const { setTheme, theme } = useTheme()
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
 
-  const expenses = useStore((state) => state.expenses)
-  const clients = useStore((state) => state.clients)
-  const partners = useStore((state) => state.partners)
-
-  const filteredExpenses = expenses.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  const filteredClients = clients.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  const filteredPartners = partners.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-
-  const hasResults = filteredExpenses.length > 0 || filteredClients.length > 0 || filteredPartners.length > 0
   const handleLogout = () => {
     // Clear local storage for the Zustand store and any other user data
     localStorage.removeItem("decodilla-finance-storage")
@@ -44,7 +32,7 @@ export function TopNav() {
   return (
     <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b bg-background px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <div className="relative flex flex-1">
+        <form className="relative flex flex-1" action="#" method="GET">
           <label htmlFor="search-field" className="sr-only">
             Search
           </label>
@@ -58,56 +46,8 @@ export function TopNav() {
             placeholder="Search expenses, clients, partners..."
             type="search"
             name="search"
-            autoComplete="off"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {searchQuery && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg max-h-[70vh] overflow-y-auto z-50 overflow-hidden">
-              <div className="p-2 space-y-4">
-                {hasResults ? (
-                  <>
-                    {filteredClients.length > 0 && (
-                      <div>
-                        <h3 className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Clients</h3>
-                        {filteredClients.map(c => (
-                          <Link key={c.id} href={`/clients`} onClick={() => setSearchQuery("")} className="block px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
-                            {c.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                    {filteredPartners.length > 0 && (
-                      <div>
-                        <h3 className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Partners</h3>
-                        {filteredPartners.map(p => (
-                          <Link key={p.id} href={`/partners/${p.id}`} onClick={() => setSearchQuery("")} className="block px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
-                            {p.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                    {filteredExpenses.length > 0 && (
-                      <div>
-                        <h3 className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Expenses</h3>
-                        {filteredExpenses.map(e => (
-                          <Link key={e.id} href={`/expenses`} onClick={() => setSearchQuery("")} className="flex justify-between items-center px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
-                            <span className="line-clamp-1">{e.name}</span>
-                            <span className="text-muted-foreground text-xs ml-4 shrink-0">₹{e.amount}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="p-6 text-center text-sm text-muted-foreground">
-                    No results found for "{searchQuery}"
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        </form>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
           <Button variant="ghost" size="icon" className="-m-2.5 p-2.5 text-muted-foreground hover:text-foreground">
             <span className="sr-only">View notifications</span>
