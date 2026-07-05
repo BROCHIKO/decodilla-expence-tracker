@@ -36,11 +36,15 @@ export function TopNav() {
   const pages = [
     { name: "Dashboard", path: "/" },
     { name: "Expenses", path: "/expenses" },
-    { name: "Clients", path: "/clients" },
+    { name: "Add Expense", path: "/expenses/new" },
     { name: "Partners", path: "/partners" },
+    { name: "Reimbursements", path: "/reimbursements" },
+    { name: "Clients", path: "/clients" },
+    { name: "Categories", path: "/categories" },
     { name: "Reports", path: "/reports" },
+    { name: "Monthly Statements", path: "/statements" },
+    { name: "Analytics", path: "/analytics" },
     { name: "Settings", path: "/settings" },
-    { name: "Profile", path: "/profile" },
   ]
   
   const filteredPages = pages.filter(page => page.name.toLowerCase().includes(searchQuery.toLowerCase()))
