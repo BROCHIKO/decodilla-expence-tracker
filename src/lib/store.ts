@@ -42,6 +42,8 @@ interface AppState {
   categories: Category[]
   
   addExpense: (expense: Omit<Expense, 'id'>) => void
+  deleteExpense: (id: string) => void
+  updateExpense: (id: string, expense: Partial<Expense>) => void
   addClient: (client: Omit<Client, 'id'>) => void
   addPartner: (partner: Omit<Partner, 'id'>) => void
   addCategory: (category: Omit<Category, 'id'>) => void
@@ -69,6 +71,16 @@ export const useStore = create<AppState>()(
 
       addExpense: (expense) => set((state) => ({
         expenses: [{ ...expense, id: crypto.randomUUID() }, ...state.expenses]
+      })),
+
+      deleteExpense: (id) => set((state) => ({
+        expenses: state.expenses.filter(exp => exp.id !== id)
+      })),
+
+      updateExpense: (id, updatedExpense) => set((state) => ({
+        expenses: state.expenses.map(exp => 
+          exp.id === id ? { ...exp, ...updatedExpense } : exp
+        )
       })),
       
       addClient: (client) => set((state) => ({

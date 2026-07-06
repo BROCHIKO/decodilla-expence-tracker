@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Plus, Search, FileDown, MoreHorizontal, FileEdit, Trash, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,8 +21,10 @@ import {
 import { useStore } from "@/lib/store"
 
 export default function ExpensesPage() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const expenses = useStore((state) => state.expenses)
+  const deleteExpense = useStore((state) => state.deleteExpense)
 
   const filteredExpenses = expenses.filter(
     (exp) =>
@@ -163,10 +166,20 @@ export default function ExpensesPage() {
                     <MoreHorizontal className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40 rounded-xl">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/expenses/${expense.id}/edit`)}
+                    >
                       <FileEdit className="mr-2 h-4 w-4" /> Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem 
+                      className="text-destructive cursor-pointer"
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to delete this expense?")) {
+                          deleteExpense(expense.id)
+                        }
+                      }}
+                    >
                       <Trash className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
