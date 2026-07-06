@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Plus, Search, FileDown, MoreHorizontal, FileEdit, Trash, FileText } from "lucide-react"
+import { Plus, Search, FileDown, MoreHorizontal, FileEdit, Trash, FileText, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +27,7 @@ export default function ExpensesPage() {
   const partners = useStore((state) => state.partners)
   const deleteExpense = useStore((state) => state.deleteExpense)
 
-  const [currentUser, setCurrentUser] = useState<string>("Company Admin")
+  const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
     const userString = localStorage.getItem('finance_os_user')
@@ -38,8 +38,11 @@ export default function ExpensesPage() {
 
   const expenses = currentUser === "Company Admin" 
     ? allExpenses 
-    : allExpenses.filter(exp => exp.payment === currentUser || exp.partnerId === partners.find(p => p.name === currentUser)?.id)
+    : allExpenses.filter(exp => exp.payment === currentUser)
 
+  if (currentUser === null) {
+    return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+  }
 
   const filteredExpenses = expenses.filter(
     (exp) =>

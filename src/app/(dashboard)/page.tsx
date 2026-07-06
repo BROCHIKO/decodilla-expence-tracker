@@ -7,7 +7,8 @@ import {
   Briefcase, 
   TrendingUp,
   CreditCard,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react"
 import { ExpenseTrend } from "@/components/dashboard/expense-trend"
 import { RecentExpenses } from "@/components/dashboard/recent-expenses"
@@ -21,7 +22,7 @@ export default function Dashboard() {
   const clients = useStore((state) => state.clients)
   const partners = useStore((state) => state.partners)
 
-  const [currentUser, setCurrentUser] = useState<string>("Company Admin")
+  const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
     const userString = localStorage.getItem('finance_os_user')
@@ -33,8 +34,11 @@ export default function Dashboard() {
   // Filter expenses: Company Admin sees all, Partners see only their own
   const expenses = currentUser === "Company Admin" 
     ? allExpenses 
-    : allExpenses.filter(exp => exp.payment === currentUser || exp.partnerId === partners.find(p => p.name === currentUser)?.id)
+    : allExpenses.filter(exp => exp.payment === currentUser)
 
+  if (currentUser === null) {
+    return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+  }
 
   // Calculations
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)

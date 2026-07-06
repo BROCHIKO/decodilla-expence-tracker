@@ -4,6 +4,7 @@ import { useStore } from "@/lib/store"
 import { useMemo, useEffect, useState } from "react"
 import { format, parseISO } from "date-fns"
 import { useRouter } from "next/navigation"
+import { Loader2 } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts"
@@ -14,7 +15,7 @@ export default function AnalyticsPage() {
   const allExpenses = useStore((state) => state.expenses)
   const categories = useStore((state) => state.categories)
   const partners = useStore((state) => state.partners)
-  const [currentUser, setCurrentUser] = useState<string>("Company Admin")
+  const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
     const userString = localStorage.getItem('finance_os_user')
@@ -25,8 +26,11 @@ export default function AnalyticsPage() {
 
   const expenses = currentUser === "Company Admin" 
     ? allExpenses 
-    : allExpenses.filter(exp => exp.payment === currentUser || exp.partnerId === partners.find(p => p.name === currentUser)?.id)
+    : allExpenses.filter(exp => exp.payment === currentUser)
 
+  if (currentUser === null) {
+    return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+  }
 
 
   const monthlyData = useMemo(() => {
