@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 
 const PARTNERS = [
+  "Company Admin",
   "Riyan Ahmad",
   "Ananthu V.K",
   "Abhijith KR"
@@ -33,17 +34,25 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
 
-    if (passkey === "doobie@2003") {
-      setIsLoading(true)
-      localStorage.setItem("finance_os_user", selectedPartner)
-      
-      // Add a small delay for UX before routing
-      setTimeout(() => {
-        router.push("/")
-      }, 500)
+    if (selectedPartner === "Company Admin") {
+      if (passkey !== "admin@decodilla2026") {
+        setError("Invalid passkey")
+        return
+      }
     } else {
-      setError("Invalid passkey")
+      if (passkey !== "doobie@2003") {
+        setError("Invalid passkey")
+        return
+      }
     }
+
+    setIsLoading(true)
+    localStorage.setItem("finance_os_user", selectedPartner)
+      
+    // Add a small delay for UX before routing
+    setTimeout(() => {
+      router.push("/")
+    }, 500)
   }
 
   return (

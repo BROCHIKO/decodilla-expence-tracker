@@ -41,7 +41,10 @@ export function TopNav() {
         // It's just a regular string, which is correct
       }
       
-      const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
+      let initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
+      if (name === "Company Admin") {
+        initials = "AD"
+      }
       setAuthUser({ name, initials })
     }
   }, [])

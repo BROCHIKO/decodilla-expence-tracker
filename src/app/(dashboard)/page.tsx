@@ -14,11 +14,27 @@ import { RecentExpenses } from "@/components/dashboard/recent-expenses"
 
 import Link from "next/link"
 import { useStore } from "@/lib/store"
+import { useEffect, useState } from "react"
 
 export default function Dashboard() {
-  const expenses = useStore((state) => state.expenses)
+  const allExpenses = useStore((state) => state.expenses)
   const clients = useStore((state) => state.clients)
   const partners = useStore((state) => state.partners)
+
+  const [currentUser, setCurrentUser] = useState<string>("Company Admin")
+
+  useEffect(() => {
+    const userString = localStorage.getItem('finance_os_user')
+    if (userString) {
+      setCurrentUser(userString)
+    }
+  }, [])
+
+  // Filter expenses: Company Admin sees all, Partners see only their own
+  const expenses = currentUser === "Company Admin" 
+    ? allExpenses 
+    : allExpenses.filter(exp => exp.payment === currentUser || exp.partnerId === partners.find(p => p.name === currentUser)?.id)
+
 
   // Calculations
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)

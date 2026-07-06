@@ -1,8 +1,9 @@
 "use client"
 
 import { useStore } from "@/lib/store"
-import { useMemo } from "react"
+import { useMemo, useEffect, useState } from "react"
 import { format, parseISO } from "date-fns"
+import { useRouter } from "next/navigation"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts"
@@ -10,8 +11,19 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pi
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899", "#64748b"]
 
 export default function AnalyticsPage() {
+  const router = useRouter()
   const expenses = useStore((state) => state.expenses)
   const categories = useStore((state) => state.categories)
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const userString = localStorage.getItem('finance_os_user')
+    if (userString !== "Company Admin") {
+      router.push("/")
+    } else {
+      setIsAuthorized(true)
+    }
+  }, [router])
 
   const monthlyData = useMemo(() => {
     const months = new Map<string, number>()
@@ -49,7 +61,12 @@ export default function AnalyticsPage() {
       .filter(([_, value]) => value > 0)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
+      .sort((a, b) => b.value - a.value)
   }, [expenses, categories])
+
+  if (!isAuthorized) {
+    return null
+  }
 
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
