@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Loader2 } from "lucide-react"
 
@@ -49,9 +50,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center space-y-4 text-center">
-          <div className="h-12 w-12 bg-primary rounded-full flex items-center justify-center shadow-sm">
-            <span className="text-primary-foreground font-bold text-xl">D</span>
-          </div>
+          <Image 
+            src="/logo.png" 
+            alt="Decodilla Logo" 
+            width={64} 
+            height={64} 
+            className="rounded-full shadow-sm"
+          />
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
               Sign in to Decodilla
