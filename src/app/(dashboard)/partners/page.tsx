@@ -25,30 +25,43 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
 import { useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 export default function PartnersPage() {
   const router = useRouter()
   const partnersStore = useStore((state) => state.partners)
-  const expenses = useStore((state) => state.expenses)
   const settleReimbursements = useStore((state) => state.settleReimbursements)
   const updatePartnerStatus = useStore((state) => state.updatePartnerStatus)
   const deletePartner = useStore((state) => state.deletePartner)
 
+  const [allExpenses, setAllExpenses] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
 
   useEffect(() => {
+    const fetchExpenses = async () => {
+      const { data, error } = await supabase.from('expenses').select('*')
+      if (!error && data) {
+        setAllExpenses(data)
+      }
+      setIsLoading(false)
+    }
+
     const userString = localStorage.getItem('finance_os_user')
     if (userString !== "Company Admin") {
       router.push("/")
     } else {
       setIsAuthorized(true)
     }
+
+    fetchExpenses()
   }, [router])
 
   // Calculate dynamic stats for each partner from the expenses array
   const partners = partnersStore.map(partner => {
-    // Look for expenses matching the partner's unique ID
-    const partnerExpenses = expenses.filter(exp => exp.partnerId === partner.id)
+    // Look for expenses matching the partner's unique name
+    const partnerExpenses = allExpenses.filter(exp => exp.paymentMethod === partner.name)
     const totalSpent = partnerExpenses.reduce((sum, exp) => sum + exp.amount, 0)
     
     // Only pending if not reimbursed
@@ -67,8 +80,8 @@ export default function PartnersPage() {
   const activePartnersCount = partners.filter(p => p.status === 'Active').length
   const totalPending = partners.reduce((sum, p) => sum + p.pendingReimbursement, 0)
 
-  if (!isAuthorized) {
-    return null
+  if (!isAuthorized || isLoading) {
+    return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
   }
 
   return (

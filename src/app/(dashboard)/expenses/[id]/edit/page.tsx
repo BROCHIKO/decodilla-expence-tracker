@@ -29,6 +29,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { useStore } from "@/lib/store"
+import { supabase } from "@/lib/supabase"
 
 const expenseFormSchema = z.object({
   date: z.date({
@@ -59,8 +60,6 @@ export default function EditExpensePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   
-  const expenses = useStore((state) => state.expenses)
-  const updateExpense = useStore((state) => state.updateExpense)
   const partners = useStore((state) => state.partners).filter(p => p.status === 'Active')
   const categories = useStore((state) => state.categories).filter(c => c.status === 'Active')
 
@@ -82,54 +81,45 @@ export default function EditExpensePage() {
   })
 
   useEffect(() => {
-    const expenseToEdit = expenses.find(e => e.id === expenseId)
-    if (expenseToEdit) {
-      let paymentValue = ""
-      if (expenseToEdit.partnerId) {
-        // If there's a partnerId, try to find the partner to get their name since we now use names
-        const partner = partners.find(p => p.id === expenseToEdit.partnerId)
-        if (partner) {
-          paymentValue = partner.name
-        }
-      } else if (expenseToEdit.payment) {
-         paymentValue = expenseToEdit.payment
-      }
+    const fetchExpense = async () => {
+      const { data, error } = await supabase.from('expenses').select('*').eq('id', expenseId).single()
       
-      reset({
-        date: expenseToEdit.date ? parseISO(expenseToEdit.date) : new Date(),
-        amount: expenseToEdit.amount,
-        name: expenseToEdit.name,
-        payment: paymentValue,
-        category: expenseToEdit.categoryId || "",
-        note: expenseToEdit.note || "",
-      })
-    } else {
-      toast.error("Expense not found")
-      router.push("/expenses")
+      if (!error && data) {
+        reset({
+          date: data.date ? parseISO(data.date) : new Date(),
+          amount: data.amount,
+          name: data.description || "",
+          payment: data.paymentMethod || "",
+          category: data.category || "",
+          note: data.note || "",
+        })
+      } else {
+        toast.error("Expense not found")
+        router.push("/expenses")
+      }
+      setIsLoading(false)
     }
-    setIsLoading(false)
-  }, [expenseId, expenses, reset, router])
+    
+    fetchExpense()
+  }, [expenseId, reset, router])
 
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true)
     
-    let paymentName = data.payment
-    let partnerId: string | undefined = undefined
-    
-    const partner = partners.find(p => p.name === data.payment)
-    if (partner) {
-      partnerId = partner.id
-    }
-    
-    updateExpense(expenseId, {
+    const { error } = await supabase.from('expenses').update({
       date: format(data.date, "yyyy-MM-dd"),
       amount: data.amount,
-      name: data.name,
-      payment: paymentName,
-      partnerId,
-      categoryId: data.category || undefined,
-      note: data.note,
-    })
+      description: data.name,
+      paymentMethod: data.payment,
+      category: data.category || "",
+    }).eq('id', expenseId)
+
+    if (error) {
+      console.error(error)
+      toast.error("Failed to update expense")
+      setIsSubmitting(false)
+      return
+    }
 
     await new Promise((resolve) => setTimeout(resolve, 300))
     setIsSubmitting(false)

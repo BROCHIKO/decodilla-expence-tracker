@@ -5,6 +5,7 @@ import { useMemo, useEffect, useState } from "react"
 import { format, parseISO } from "date-fns"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts"
@@ -12,23 +13,35 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pi
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899", "#64748b"]
 
 export default function AnalyticsPage() {
-  const allExpenses = useStore((state) => state.expenses)
   const categories = useStore((state) => state.categories)
   const partners = useStore((state) => state.partners)
+
+  const [allExpenses, setAllExpenses] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
+    const fetchExpenses = async () => {
+      const { data, error } = await supabase.from('expenses').select('*')
+      if (!error && data) {
+        setAllExpenses(data)
+      }
+      setIsLoading(false)
+    }
+
     const userString = localStorage.getItem('finance_os_user')
     if (userString) {
       setCurrentUser(userString)
     }
+
+    fetchExpenses()
   }, [])
 
   const expenses = currentUser === "Company Admin" 
     ? allExpenses 
-    : allExpenses.filter(exp => exp.payment === currentUser)
+    : allExpenses.filter(exp => exp.paymentMethod === currentUser)
 
-  if (currentUser === null) {
+  if (currentUser === null || isLoading) {
     return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
   }
 
@@ -57,8 +70,8 @@ export default function AnalyticsPage() {
     const catAmounts = new Map<string, number>()
     
     expenses.forEach(exp => {
-      const catName = exp.categoryId 
-        ? (categories.find(c => c.id === exp.categoryId)?.name || "Other")
+      const catName = exp.category 
+        ? (categories.find(c => c.id === exp.category)?.name || "Other")
         : "Uncategorized"
         
       const current = catAmounts.get(catName) || 0

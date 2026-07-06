@@ -29,6 +29,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useStore } from "@/lib/store"
+import { supabase } from "@/lib/supabase"
 
 const expenseFormSchema = z.object({
   date: z.date({
@@ -54,7 +55,6 @@ type ExpenseFormValues = z.infer<typeof expenseFormSchema>
 export default function AddExpensePage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const addExpense = useStore((state) => state.addExpense)
   const partners = useStore((state) => state.partners).filter(p => p.status === 'Active')
   const categories = useStore((state) => state.categories).filter(c => c.status === 'Active')
 
@@ -86,23 +86,22 @@ export default function AddExpensePage() {
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true)
     
-    let paymentName = data.payment
-    let partnerId: string | undefined = undefined
-    
-    const partner = partners.find(p => p.name === data.payment)
-    if (partner) {
-      partnerId = partner.id
+    const { error } = await supabase.from('expenses').insert([
+      {
+        date: format(data.date, "yyyy-MM-dd"),
+        amount: data.amount,
+        description: data.name,
+        paymentMethod: data.payment,
+        category: data.category || "",
+      }
+    ])
+
+    if (error) {
+      console.error(error)
+      toast.error("Failed to save expense to Supabase")
+      setIsSubmitting(false)
+      return
     }
-    
-    addExpense({
-      date: format(data.date, "yyyy-MM-dd"),
-      amount: data.amount,
-      name: data.name,
-      payment: paymentName,
-      partnerId,
-      categoryId: data.category || undefined,
-      note: data.note,
-    })
 
     // Simulate small delay for UX
     await new Promise((resolve) => setTimeout(resolve, 300))

@@ -18,36 +18,46 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { useStore } from "@/lib/store"
+import { supabase } from "@/lib/supabase"
 
 export default function ExpensesPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
-  const allExpenses = useStore((state) => state.expenses)
-  const partners = useStore((state) => state.partners)
-  const deleteExpense = useStore((state) => state.deleteExpense)
+  // Fetch from Supabase
+  const [allExpenses, setAllExpenses] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
+    const fetchExpenses = async () => {
+      const { data, error } = await supabase.from('expenses').select('*')
+      if (!error && data) {
+        setAllExpenses(data)
+      }
+      setIsLoading(false)
+    }
+
     const userString = localStorage.getItem('finance_os_user')
     if (userString) {
       setCurrentUser(userString)
     }
+    
+    fetchExpenses()
   }, [])
 
   const expenses = currentUser === "Company Admin" 
     ? allExpenses 
-    : allExpenses.filter(exp => exp.payment === currentUser)
+    : allExpenses.filter(exp => exp.paymentMethod === currentUser)
 
-  if (currentUser === null) {
+  if (currentUser === null || isLoading) {
     return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
   }
 
   const filteredExpenses = expenses.filter(
     (exp) =>
-      exp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exp.payment.toLowerCase().includes(searchTerm.toLowerCase())
+      exp.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exp.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const exportToPDF = async () => {
@@ -86,8 +96,8 @@ export default function ExpensesPage() {
     
     const tableData = expenses.map(exp => [
       exp.date,
-      exp.name,
-      exp.payment,
+      exp.description,
+      exp.paymentMethod,
       `Rs. ${exp.amount.toLocaleString('en-IN')}`
     ])
     
@@ -161,14 +171,14 @@ export default function ExpensesPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="text-2xl font-bold tracking-tight">₹{expense.amount}</div>
-                  <div className="text-sm text-muted-foreground mt-1 font-medium line-clamp-1">{expense.name}</div>
+                  <div className="text-sm text-muted-foreground mt-1 font-medium line-clamp-1">{expense.description}</div>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm mt-2 pt-4 border-t border-border/50">
                 <div>
                   <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-1">Payment</p>
-                  <p className="font-medium line-clamp-1">{expense.payment}</p>
+                  <p className="font-medium line-clamp-1">{expense.paymentMethod}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-1">Date</p>
@@ -192,9 +202,12 @@ export default function ExpensesPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="text-destructive cursor-pointer"
-                      onClick={() => {
+                      onClick={async () => {
                         if (window.confirm("Are you sure you want to delete this expense?")) {
-                          deleteExpense(expense.id)
+                          const { error } = await supabase.from('expenses').delete().eq('id', expense.id)
+                          if (!error) {
+                            setAllExpenses(allExpenses.filter(e => e.id !== expense.id))
+                          }
                         }
                       }}
                     >

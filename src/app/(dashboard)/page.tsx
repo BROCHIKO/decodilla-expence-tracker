@@ -16,27 +16,39 @@ import { RecentExpenses } from "@/components/dashboard/recent-expenses"
 import Link from "next/link"
 import { useStore } from "@/lib/store"
 import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
 
 export default function Dashboard() {
-  const allExpenses = useStore((state) => state.expenses)
   const clients = useStore((state) => state.clients)
   const partners = useStore((state) => state.partners)
 
+  const [allExpenses, setAllExpenses] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
+    const fetchExpenses = async () => {
+      const { data, error } = await supabase.from('expenses').select('*')
+      if (!error && data) {
+        setAllExpenses(data)
+      }
+      setIsLoading(false)
+    }
+
     const userString = localStorage.getItem('finance_os_user')
     if (userString) {
       setCurrentUser(userString)
     }
+
+    fetchExpenses()
   }, [])
 
   // Filter expenses: Company Admin sees all, Partners see only their own
   const expenses = currentUser === "Company Admin" 
     ? allExpenses 
-    : allExpenses.filter(exp => exp.payment === currentUser)
+    : allExpenses.filter(exp => exp.paymentMethod === currentUser)
 
-  if (currentUser === null) {
+  if (currentUser === null || isLoading) {
     return <div className="flex-1 flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
   }
 
