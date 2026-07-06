@@ -31,6 +31,7 @@ export default function PartnersPage() {
   const expenses = useStore((state) => state.expenses)
   const settleReimbursements = useStore((state) => state.settleReimbursements)
   const updatePartnerStatus = useStore((state) => state.updatePartnerStatus)
+  const deletePartner = useStore((state) => state.deletePartner)
 
   // Calculate dynamic stats for each partner from the expenses array
   const partners = partnersStore.map(partner => {
@@ -146,14 +147,24 @@ export default function PartnersPage() {
                         Settle Reimbursement
                       </DropdownMenuItem>
                       {partner.status === 'Active' ? (
-                        <DropdownMenuItem className="text-destructive" onClick={() => updatePartnerStatus(partner.id, 'Inactive')}>
+                        <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => updatePartnerStatus(partner.id, 'Inactive')}>
                           Deactivate
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem className="text-success" onClick={() => updatePartnerStatus(partner.id, 'Active')}>
+                        <DropdownMenuItem className="text-success cursor-pointer" onClick={() => updatePartnerStatus(partner.id, 'Active')}>
                           Activate
                         </DropdownMenuItem>
                       )}
+                      <DropdownMenuItem 
+                        className="text-red-500 cursor-pointer" 
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to delete this partner? This action cannot be undone.")) {
+                            deletePartner(partner.id)
+                          }
+                        }}
+                      >
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

@@ -46,6 +46,7 @@ interface AppState {
   updateExpense: (id: string, expense: Partial<Expense>) => void
   addClient: (client: Omit<Client, 'id'>) => void
   addPartner: (partner: Omit<Partner, 'id'>) => void
+  deletePartner: (id: string) => void
   addCategory: (category: Omit<Category, 'id'>) => void
   deleteCategory: (id: string) => void
   updatePartnerStatus: (id: string, status: 'Active' | 'Inactive') => void
@@ -89,6 +90,10 @@ export const useStore = create<AppState>()(
       
       addPartner: (partner) => set((state) => ({
         partners: [{ ...partner, id: crypto.randomUUID(), status: 'Active' }, ...state.partners]
+      })),
+
+      deletePartner: (id) => set((state) => ({
+        partners: state.partners.filter(p => p.id !== id)
       })),
 
       addCategory: (category) => set((state) => ({
