@@ -24,6 +24,18 @@ export function TopNav() {
   const { setTheme, theme } = useTheme()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
+  const [authUser, setAuthUser] = useState<{name: string, initials: string} | null>(null)
+
+  useEffect(() => {
+    const userString = localStorage.getItem('finance_os_user')
+    if (userString) {
+      try {
+        setAuthUser(JSON.parse(userString))
+      } catch (e) {
+        console.error("Failed to parse user", e)
+      }
+    }
+  }, [])
 
   const expenses = useStore((state) => state.expenses)
   const clients = useStore((state) => state.clients)
@@ -52,9 +64,9 @@ export function TopNav() {
   const hasResults = filteredPages.length > 0 || filteredExpenses.length > 0 || filteredClients.length > 0 || filteredPartners.length > 0
   const handleLogout = () => {
     // Clear local storage for the Zustand store and any other user data
-    localStorage.removeItem("decodilla-finance-storage")
+    localStorage.removeItem("finance_os_user")
     // Redirect to home or login page and force refresh to clear state
-    window.location.href = "/"
+    window.location.href = "/login"
   }
 
   return (
@@ -158,11 +170,13 @@ export function TopNav() {
               <span className="sr-only">Open user menu</span>
               <Avatar className="h-8 w-8">
                 <AvatarImage src="" alt="User" />
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">AD</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {authUser?.initials || "AD"}
+                </AvatarFallback>
               </Avatar>
               <span className="hidden lg:flex lg:items-center">
                 <span className="ml-4 text-sm font-semibold leading-6 text-foreground" aria-hidden="true">
-                  Admin User
+                  {authUser?.name || "Admin User"}
                 </span>
               </span>
             </DropdownMenuTrigger>
