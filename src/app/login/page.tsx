@@ -24,7 +24,7 @@ const PARTNERS = [
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [partnerId, setPartnerId] = useState<string>("")
+  const [selectedUser, setSelectedUser] = useState<string>("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
     event.preventDefault()
     setError(null)
     
-    if (!partnerId) {
+    if (!selectedUser) {
       setError("Please select a partner.")
       return
     }
@@ -44,7 +44,7 @@ export default function LoginPage() {
 
     setIsLoading(true)
 
-    const selectedPartner = PARTNERS.find(p => p.id === partnerId)
+    const selectedPartner = PARTNERS.find(p => p.name === selectedUser)
     
     if (selectedPartner) {
       // Small delay for UX
@@ -76,13 +76,13 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="partner">Partner Profile</Label>
-              <Select value={partnerId} onValueChange={(val) => setPartnerId(val || "")} required>
+              <Select value={selectedUser} onValueChange={(val) => setSelectedUser(val || "")} required>
                 <SelectTrigger id="partner" className="h-12 rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background transition-colors">
                   <SelectValue placeholder="Select your profile" />
                 </SelectTrigger>
                 <SelectContent>
                   {PARTNERS.map(partner => (
-                    <SelectItem key={partner.id} value={partner.id}>
+                    <SelectItem key={partner.name} value={partner.name}>
                       {partner.name}
                     </SelectItem>
                   ))}
