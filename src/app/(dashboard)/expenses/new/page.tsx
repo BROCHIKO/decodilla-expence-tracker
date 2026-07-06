@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
@@ -62,6 +62,7 @@ export default function AddExpensePage() {
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -69,23 +70,28 @@ export default function AddExpensePage() {
       date: new Date(),
       name: "",
       note: "",
-      payment: "company_card",
+      payment: "",
       category: "",
     },
   })
 
+  useEffect(() => {
+    const userString = localStorage.getItem('finance_os_user')
+    if (userString) {
+      // Set the default payment method to the logged in user's name
+      setValue("payment", userString)
+    }
+  }, [setValue])
+
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true)
     
-    let paymentName = "Company Card"
+    let paymentName = data.payment
     let partnerId: string | undefined = undefined
     
-    if (data.payment !== "company_card") {
-      const partner = partners.find(p => p.id === data.payment)
-      if (partner) {
-        paymentName = `Paid by ${partner.name}`
-        partnerId = partner.id
-      }
+    const partner = partners.find(p => p.name === data.payment)
+    if (partner) {
+      partnerId = partner.id
     }
     
     addExpense({
@@ -195,10 +201,9 @@ export default function AddExpensePage() {
                       <SelectValue placeholder="Select payment method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="company_card">Company Card</SelectItem>
                       {partners.map(partner => (
-                        <SelectItem key={partner.id} value={partner.id}>
-                          Paid by {partner.name}
+                        <SelectItem key={partner.name} value={partner.name}>
+                          {partner.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

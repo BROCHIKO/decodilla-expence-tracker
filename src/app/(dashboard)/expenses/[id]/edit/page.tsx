@@ -76,7 +76,7 @@ export default function EditExpensePage() {
       date: new Date(),
       name: "",
       note: "",
-      payment: "company_card",
+      payment: "",
       category: "",
     },
   })
@@ -84,9 +84,15 @@ export default function EditExpensePage() {
   useEffect(() => {
     const expenseToEdit = expenses.find(e => e.id === expenseId)
     if (expenseToEdit) {
-      let paymentValue = "company_card"
+      let paymentValue = ""
       if (expenseToEdit.partnerId) {
-        paymentValue = expenseToEdit.partnerId
+        // If there's a partnerId, try to find the partner to get their name since we now use names
+        const partner = partners.find(p => p.id === expenseToEdit.partnerId)
+        if (partner) {
+          paymentValue = partner.name
+        }
+      } else if (expenseToEdit.payment) {
+         paymentValue = expenseToEdit.payment
       }
       
       reset({
@@ -107,15 +113,12 @@ export default function EditExpensePage() {
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true)
     
-    let paymentName = "Company Card"
+    let paymentName = data.payment
     let partnerId: string | undefined = undefined
     
-    if (data.payment !== "company_card") {
-      const partner = partners.find(p => p.id === data.payment)
-      if (partner) {
-        paymentName = `Paid by ${partner.name}`
-        partnerId = partner.id
-      }
+    const partner = partners.find(p => p.name === data.payment)
+    if (partner) {
+      partnerId = partner.id
     }
     
     updateExpense(expenseId, {
@@ -228,10 +231,9 @@ export default function EditExpensePage() {
                       <SelectValue placeholder="Select payment method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="company_card">Company Card</SelectItem>
                       {partners.map(partner => (
-                        <SelectItem key={partner.id} value={partner.id}>
-                          Paid by {partner.name}
+                        <SelectItem key={partner.name} value={partner.name}>
+                          {partner.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
