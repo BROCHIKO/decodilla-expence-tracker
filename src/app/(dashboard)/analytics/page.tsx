@@ -11,19 +11,23 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pi
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899", "#64748b"]
 
 export default function AnalyticsPage() {
-  const router = useRouter()
-  const expenses = useStore((state) => state.expenses)
+  const allExpenses = useStore((state) => state.expenses)
   const categories = useStore((state) => state.categories)
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
+  const partners = useStore((state) => state.partners)
+  const [currentUser, setCurrentUser] = useState<string>("Company Admin")
 
   useEffect(() => {
     const userString = localStorage.getItem('finance_os_user')
-    if (userString !== "Company Admin") {
-      router.push("/")
-    } else {
-      setIsAuthorized(true)
+    if (userString) {
+      setCurrentUser(userString)
     }
-  }, [router])
+  }, [])
+
+  const expenses = currentUser === "Company Admin" 
+    ? allExpenses 
+    : allExpenses.filter(exp => exp.payment === currentUser || exp.partnerId === partners.find(p => p.name === currentUser)?.id)
+
+
 
   const monthlyData = useMemo(() => {
     const months = new Map<string, number>()
@@ -64,9 +68,6 @@ export default function AnalyticsPage() {
       .sort((a, b) => b.value - a.value)
   }, [expenses, categories])
 
-  if (!isAuthorized) {
-    return null
-  }
 
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">

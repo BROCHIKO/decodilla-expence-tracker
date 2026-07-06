@@ -24,6 +24,7 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
+import { useEffect, useState } from "react"
 
 export default function PartnersPage() {
   const router = useRouter()
@@ -32,6 +33,17 @@ export default function PartnersPage() {
   const settleReimbursements = useStore((state) => state.settleReimbursements)
   const updatePartnerStatus = useStore((state) => state.updatePartnerStatus)
   const deletePartner = useStore((state) => state.deletePartner)
+
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const userString = localStorage.getItem('finance_os_user')
+    if (userString !== "Company Admin") {
+      router.push("/")
+    } else {
+      setIsAuthorized(true)
+    }
+  }, [router])
 
   // Calculate dynamic stats for each partner from the expenses array
   const partners = partnersStore.map(partner => {
@@ -54,6 +66,10 @@ export default function PartnersPage() {
   // Summary Card Calculations
   const activePartnersCount = partners.filter(p => p.status === 'Active').length
   const totalPending = partners.reduce((sum, p) => sum + p.pendingReimbursement, 0)
+
+  if (!isAuthorized) {
+    return null
+  }
 
   return (
     <div className="flex-1 space-y-6 max-w-6xl mx-auto w-full">
