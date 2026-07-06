@@ -16,42 +16,32 @@ import {
 } from "@/components/ui/select"
 
 const PARTNERS = [
-  { id: "riyan", name: "Riyan Ahmad", initials: "RA" },
-  { id: "ananthu", name: "Ananthu V.K", initials: "AV" },
-  { id: "abhijith", name: "Abhijith KR", initials: "AK" },
+  "Riyan Ahmad",
+  "Ananthu V.K",
+  "Abhijith KR"
 ]
 
 export default function LoginPage() {
   const router = useRouter()
+  const [selectedPartner, setSelectedPartner] = useState("Riyan Ahmad")
+  const [passkey, setPasskey] = useState("")
+  const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<string>("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
 
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
-    setError(null)
-    
-    if (!selectedUser) {
-      setError("Please select a partner.")
-      return
-    }
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
 
-    if (password !== "doobie@2003") {
-      setError("Invalid passkey.")
-      return
-    }
-
-    setIsLoading(true)
-
-    const selectedPartner = PARTNERS.find(p => p.name === selectedUser)
-    
-    if (selectedPartner) {
-      // Small delay for UX
+    if (passkey === "doobie@2003") {
+      setIsLoading(true)
+      localStorage.setItem("finance_os_user", selectedPartner)
+      
+      // Add a small delay for UX before routing
       setTimeout(() => {
-        localStorage.setItem("finance_os_user", JSON.stringify(selectedPartner))
         router.push("/")
-      }, 600)
+      }, 500)
+    } else {
+      setError("Invalid passkey")
     }
   }
 
@@ -59,7 +49,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center space-y-4 text-center">
-          <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+          <div className="h-12 w-12 bg-primary rounded-full flex items-center justify-center shadow-sm">
             <span className="text-primary-foreground font-bold text-xl">D</span>
           </div>
           <div className="space-y-1">
@@ -72,18 +62,18 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="partner">Partner Profile</Label>
-              <Select value={selectedUser} onValueChange={(val) => setSelectedUser(val || "")} required>
+              <Select value={selectedPartner} onValueChange={(val) => setSelectedPartner(val || "")}>
                 <SelectTrigger id="partner" className="h-12 rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background transition-colors">
                   <SelectValue placeholder="Select your profile" />
                 </SelectTrigger>
                 <SelectContent>
                   {PARTNERS.map(partner => (
-                    <SelectItem key={partner.name} value={partner.name}>
-                      {partner.name}
+                    <SelectItem key={partner} value={partner}>
+                      {partner}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -91,12 +81,12 @@ export default function LoginPage() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Passkey</Label>
+              <Label htmlFor="passkey">Passkey</Label>
               <Input
-                id="password"
+                id="passkey"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={passkey}
+                onChange={(e) => setPasskey(e.target.value)}
                 disabled={isLoading}
                 required
                 className="h-12 rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background transition-colors"
@@ -105,13 +95,13 @@ export default function LoginPage() {
             </div>
             
             {error && (
-              <p className="text-sm font-medium text-destructive mt-2 text-center">
+              <p className="text-sm font-medium text-red-500 mt-2 text-center">
                 {error}
               </p>
             )}
           </div>
 
-          <Button className="w-full h-12 rounded-xl text-base shadow-sm" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 rounded-xl text-base shadow-sm" disabled={isLoading}>
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

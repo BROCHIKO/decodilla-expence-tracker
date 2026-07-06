@@ -29,11 +29,20 @@ export function TopNav() {
   useEffect(() => {
     const userString = localStorage.getItem('finance_os_user')
     if (userString) {
+      // It's just a raw string like "Riyan Ahmad" now
+      // Handle older JSON formats just in case, but primary is raw string
+      let name = userString
       try {
-        setAuthUser(JSON.parse(userString))
+        const parsed = JSON.parse(userString)
+        if (parsed && parsed.name) {
+          name = parsed.name
+        }
       } catch (e) {
-        console.error("Failed to parse user", e)
+        // It's just a regular string, which is correct
       }
+      
+      const initials = name.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
+      setAuthUser({ name, initials })
     }
   }, [])
 
